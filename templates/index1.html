@@ -1,0 +1,316 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>GitHub Popularity Predictor</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Roboto+Mono:ital,wght@0,100..700;1,100..700&family=Roboto:ital,wght@0,100;0,300;0,400;0,500;0,700;0,900;1,100;1,300;1,400;1,500;1,700;1,900&display=swap"
+      rel="stylesheet"
+    />
+    <link
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css"
+      rel="stylesheet"
+    />
+    <style>
+      :root {
+        --primary-color: #4b4b4b;
+        --primary-hover-color: #383838;
+        --background-color: #121212;
+        --card-bg-color: #1e1e1e;
+        --text-color: #e0e0e0;
+        --heading-color: #ffffff;
+        --spinner-color: #95a096;
+        --border-color: #333333;
+        --file-button-bg: #959b95;
+        --file-button-text: #ffffff;
+      }
+
+      /* Light mode theme */
+      body.light-mode {
+        --background-color: #f4f7f6;
+        --card-bg-color: #ffffff;
+        --text-color: #333333;
+        --heading-color: #222222;
+        --border-color: #dddddd;
+        --file-button-bg: #202121; /*bg file #3498db*/
+        --file-button-text: #ffffff;
+      }
+
+      body {
+        font-family: "Roboto", sans-serif;
+        background-color: var(--background-color);
+        color: var(--text-color);
+        margin: 0;
+        padding: 0;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        flex-direction: column;
+        height: 100vh;
+        transition: background-color 0.5s ease, color 0.5s ease;
+      }
+
+      .container {
+        background-color: var(--card-bg-color);
+        border-radius: 10px;
+        box-shadow: 0 4px 10px rgba(0, 0, 0, 0.5);
+        padding: 30px;
+        max-width: 400px;
+        width: 100%;
+        text-align: center;
+        margin-bottom: 20px;
+        transition: background-color 0.5s ease, box-shadow 0.5s ease;
+      }
+
+      h1,
+      h2 {
+        font-weight: 600;
+        font-size: 24px;
+        margin-bottom: 20px;
+        color: var(--heading-color);
+        transition: color 0.5s ease;
+      }
+
+      input[type="text"],
+      input[type="file"] {
+        width: 100%;
+        max-width: 360px; /* Ensure it doesn't exceed the container width */
+        padding: 10px;
+        margin-bottom: 20px;
+        border: 1px solid var(--border-color);
+        border-radius: 5px;
+        font-size: 14px;
+        background-color: var(--background-color);
+        color: var(--text-color);
+        transition: background-color 0.5s ease, color 0.5s ease,
+          border-color 0.5s ease;
+      }
+
+      input[type="text"]::placeholder {
+        color: #888;
+      }
+
+      button {
+        background-color: var(--primary-color);
+        color: white;
+        padding: 12px 20px;
+        border: none;
+        border-radius: 5px;
+        font-size: 16px;
+        cursor: pointer;
+        width: 100%;
+        max-width: 360px;
+        transition: background-color 0.3s ease, transform 0.2s ease;
+      }
+
+      button:hover {
+        background-color: var(--primary-hover-color);
+        transform: scale(1.05);
+      }
+
+      button:disabled {
+        cursor: not-allowed;
+        opacity: 0.7;
+      }
+
+      .file-upload {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        margin-bottom: 20px;
+      }
+
+      input[type="file"] {
+        display: none;
+      }
+
+      .file-upload label {
+        background-color: var(--file-button-bg);
+        color: var(--file-button-text);
+        padding: 10px 20px;
+        border-radius: 5px;
+        text-align: center;
+        cursor: pointer;
+        transition: background-color 0.3s ease, transform 0.2s ease;
+      }
+
+      .file-upload label:hover {
+        background-color: var(--primary-hover-color);
+        transform: scale(1.05);
+      }
+
+      .file-name {
+        margin-top: 10px;
+        font-size: 14px;
+        color: var(--text-color);
+        font-style: italic;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+        max-width: 100%;
+        transition: color 0.5s ease;
+      }
+
+      /* Spinner Styles */
+      .spinner {
+        display: none;
+        margin-left: 10px;
+        border: 2px solid var(--spinner-color);
+        border-top: 2px solid transparent;
+        border-radius: 50%;
+        width: 16px;
+        height: 16px;
+        animation: spin 0.8s linear infinite;
+      }
+
+      @keyframes spin {
+        0% {
+          transform: rotate(0deg);
+        }
+        100% {
+          transform: rotate(360deg);
+        }
+      }
+
+      .loading .spinner {
+        display: inline-block;
+      }
+
+      /* Toggle switch styles */
+      .toggle-switch {
+        position: absolute;
+        top: 20px;
+        right: 20px;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+      }
+
+      .toggle-switch input {
+        display: none;
+      }
+
+      .toggle-switch-label {
+        display: inline-block;
+        width: 50px;
+        height: 25px;
+        background-color: var(--border-color);
+        border-radius: 50px;
+        position: relative;
+        cursor: pointer;
+        transition: background-color 0.4s ease;
+      }
+
+      .toggle-switch-label::after {
+        content: "";
+        position: absolute;
+        width: 20px;
+        height: 20px;
+        background-color: var(--card-bg-color);
+        border-radius: 50%;
+        top: 50%;
+        left: 5%;
+        transform: translate(0, -50%);
+        transition: transform 0.4s ease, background-color 0.4s ease;
+      }
+
+      .toggle-switch input:checked + .toggle-switch-label {
+        background-color: var(--primary-color);
+      }
+
+      .toggle-switch input:checked + .toggle-switch-label::after {
+        transform: translate(24px, -50%);
+        background-color: var(--primary-hover-color);
+      }
+
+      .toggle-switch i {
+        font-size: 20px;
+        color: var(--text-color);
+        transition: color 0.5s ease;
+      }
+
+      .toggle-switch.light i {
+        color: var(--heading-color);
+      }
+    </style>
+  </head>
+  <body>
+    <!-- Toggle Switch -->
+    <div class="toggle-switch" id="themeToggleContainer">
+      <input type="checkbox" id="themeToggle" />
+      <label for="themeToggle" class="toggle-switch-label"></label>
+      <i class="fas fa-moon" id="themeIcon"></i>
+    </div>
+
+    <!-- GitHub Analysis Section -->
+    <div class="container">
+      <h1>GitHub Popularity Predictor</h1>
+      <form id="githubForm" action="/fetch_data" method="POST">
+        <label for="username">Enter GitHub Username:</label>
+        <input
+          type="text"
+          id="username"
+          name="username"
+          required
+          placeholder="e.g.,octocat"
+        />
+        <button type="submit">Fetch Data</button>
+        <div class="spinner" id="githubSpinner"></div>
+      </form>
+    </div>
+
+    <!-- Resume Upload Section -->
+    <div class="container">
+      <h2>Resume Analyzer</h2>
+      <form
+        id="resumeForm"
+        action="/upload_resume"
+        method="POST"
+        enctype="multipart/form-data"
+      >
+        <div class="file-upload">
+          <input type="file" id="resume" name="resume" required />
+          <label for="resume">Choose File</label>
+          <span id="fileName" class="file-name">No file chosen</span>
+        </div>
+        <button type="submit">Upload</button>
+        <div class="spinner" id="resumeSpinner"></div>
+      </form>
+    </div>
+
+    <script>
+      // Toggle between light and dark modes
+      const themeToggle = document.getElementById("themeToggle");
+      const themeIcon = document.getElementById("themeIcon");
+
+      themeToggle.addEventListener("change", () => {
+        const isLightMode = themeToggle.checked;
+        document.body.classList.toggle("light-mode", isLightMode);
+        themeIcon.className = isLightMode ? "fas fa-sun" : "fas fa-moon";
+      });
+
+      // Update the file name display when a file is selected
+      document.getElementById("resume").addEventListener("change", function () {
+        const fileName = this.files[0]?.name || "No file chosen";
+        document.getElementById("fileName").textContent = fileName;
+      });
+
+      // Add spinner functionality for GitHub form
+      const githubForm = document.getElementById("githubForm");
+      const githubSpinner = document.getElementById("githubSpinner");
+      githubForm.addEventListener("submit", (e) => {
+        githubSpinner.parentNode.classList.add("loading");
+      });
+
+      // Add spinner functionality for Resume form
+      const resumeForm = document.getElementById("resumeForm");
+      const resumeSpinner = document.getElementById("resumeSpinner");
+      resumeForm.addEventListener("submit", (e) => {
+        resumeSpinner.parentNode.classList.add("loading");
+      });
+    </script>
+  </body>
+</html>

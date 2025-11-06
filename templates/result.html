@@ -1,0 +1,254 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GitHub Profile and Popularity Prediction</title>
+    <style>
+        :root {
+            --primary-color: #4CAF50;
+            --primary-hover-color: #45a049;
+            --background-color: #f4f7f6;
+            --card-bg-color: #ffffff;
+            --text-color: #333333;
+            --heading-color: #222222;
+            --border-color: #dddddd;
+            --transition-speed: 0.3s;
+        }
+
+        body.dark-mode {
+            --background-color: #121212;
+            --card-bg-color: #1e1e1e;
+            --text-color: #e0e0e0;
+            --heading-color: #ffffff;
+            --border-color: #333333;
+        }
+
+        body {
+            margin: 0;
+            padding: 0;
+            font-family: 'Arial', sans-serif;
+            background-color: var(--background-color);
+            color: var(--text-color);
+            display: flex;
+            min-height: 100vh;
+            transition: background-color var(--transition-speed), color var(--transition-speed);
+        }
+
+        .container {
+            display: flex;
+            width: 100%;
+            max-width: 1200px;
+            margin: 20px auto;
+            background-color: var(--card-bg-color);
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+            border-radius: 10px;
+            overflow: hidden;
+            transition: background-color var(--transition-speed), color var(--transition-speed);
+        }
+
+        .left-pane {
+            flex: 0 0 300px;
+            background-color: var(--card-bg-color);
+            padding: 20px;
+            border-right: 1px solid var(--border-color);
+            position: relative;
+            overflow-y: auto;
+            height: 100vh;
+            transition: background-color var(--transition-speed), color var(--transition-speed);
+        }
+
+        .right-pane {
+            flex: 1;
+            background-color: var(--background-color);
+            padding: 20px;
+            overflow-y: auto;
+            height: 100vh;
+            transition: background-color var(--transition-speed), color var(--transition-speed);
+        }
+
+        h1 {
+            font-size: 24px;
+            color: var(--heading-color);
+            margin-bottom: 10px;
+        }
+
+        p {
+            font-size: 14px;
+            margin: 10px 0;
+        }
+
+        h2 {
+            font-size: 20px;
+            color: var(--primary-color);
+            margin-top: 30px;
+            margin-bottom: 10px;
+            border-bottom: 2px solid var(--primary-color);
+            display: inline-block;
+            padding-bottom: 5px;
+        }
+
+        .popularity-score {
+            font-size: 20px;
+            color: var(--primary-color);
+            background: rgba(76, 175, 80, 0.2);
+            padding: 15px;
+            border-radius: 8px;
+            text-align: center;
+            margin-top: 20px;
+            font-weight: bold;
+        }
+
+        .project-card {
+            background-color: var(--card-bg-color);
+            border-radius: 8px;
+            padding: 15px;
+            margin-bottom: 15px;
+            border: 1px solid var(--border-color);
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+            transition: background-color var(--transition-speed), color var(--transition-speed);
+        }
+
+        .project-card h4 {
+            margin: 0 0 10px;
+            font-size: 16px;
+            color: var(--primary-color);
+        }
+
+        .project-card h4 a {
+            text-decoration: none;
+            color: var(--primary-color);
+            transition: color 0.3s;
+        }
+
+        .project-card h4 a:hover {
+            color: var(--primary-hover-color);
+        }
+
+        .project-card p {
+            margin: 5px 0;
+            font-size: 14px;
+        }
+
+        .project-stats {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 10px;
+        }
+
+        .project-stats div {
+            flex: 1;
+            background-color: var(--background-color);
+            border: 1px solid var(--border-color);
+            border-radius: 5px;
+            text-align: center;
+            padding: 10px;
+            margin-right: 10px;
+            font-size: 14px;
+            color: var(--text-color);
+        }
+
+        .project-stats div:last-child {
+            margin-right: 0;
+        }
+
+        /* Sliding theme toggle */
+        .theme-toggle-container {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            z-index: 1000;
+            display: flex;
+            align-items: center;
+            cursor: pointer;
+        }
+
+        .theme-toggle {
+            position: relative;
+            width: 60px;
+            height: 30px;
+            background-color: var(--card-bg-color);
+            border-radius: 15px;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+            border: 1px solid var(--border-color);
+            transition: background-color var(--transition-speed), box-shadow var(--transition-speed);
+        }
+
+        .theme-toggle::after {
+            content: '';
+            position: absolute;
+            top: 3px;
+            left: 3px;
+            width: 24px;
+            height: 24px;
+            background-color: var(--primary-color);
+            border-radius: 50%;
+            transition: transform var(--transition-speed);
+        }
+
+        body.dark-mode .theme-toggle::after {
+            transform: translateX(30px);
+        }
+
+        .theme-icon {
+            margin-left: 10px;
+            font-size: 16px;
+            transition: color var(--transition-speed);
+        }
+    </style>
+</head>
+
+<body>
+    <div class="theme-toggle-container" id="themeToggleContainer">
+        <div class="theme-toggle" id="themeToggle"></div>
+        <i class="theme-icon" id="themeIcon">💡</i>
+    </div>
+    <div class="container">
+        <aside class="left-pane">
+            <h1>GitHub Profile for {{ result.name }}</h1>
+            <p><strong>Bio:</strong> {{ result.bio or 'No bio available' }}</p>
+            <p><strong>Followers:</strong> {{ result.followers }}</p>
+            <p><strong>Location:</strong> {{ result.location or 'Not specified' }}</p>
+            <p><strong>Company:</strong> {{ result.company or 'Not specified' }}</p>
+
+            <h2>Predicted Popularity Score</h2>
+            <div class="popularity-score">{{ result.predicted_popularity }}</div>
+        </aside>
+
+        <section class="right-pane">
+            <h2>Completed Projects</h2>
+            {% if result.completed_projects %}
+                {% for project in result.completed_projects %}
+                    <div class="project-card">
+                        <h4><a href="{{ project.url }}" target="_blank">{{ project.name }}</a></h4>
+                        <p><strong>Description:</strong> {{ project.description }}</p>
+                        <div class="project-stats">
+                            <div>
+                                <strong>⭐ Stars</strong><br>{{ project.stars }}
+                            </div>
+                            <div>
+                                <strong>🔄 Commits</strong><br>{{ project.num_commits_last_year }}
+                            </div>
+                        </div>
+                    </div>
+                {% endfor %}
+            {% else %}
+                <p>No completed projects found for this user.</p>
+            {% endif %}
+        </section>
+    </div>
+
+    <script>
+        const themeToggle = document.getElementById('themeToggle');
+        const themeIcon = document.getElementById('themeIcon');
+
+        themeToggle.addEventListener('click', () => {
+            document.body.classList.toggle('dark-mode');
+            // Toggle between icons
+            themeIcon.textContent = document.body.classList.contains('dark-mode') ? '💡' : '🌙';
+        });
+    </script>
+</body>
+
+</html>

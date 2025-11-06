@@ -1,0 +1,225 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Personality Prediction Results</title>
+    <style>
+        /* Default light theme styles */
+        :root {
+            --background-color: #f4f4f4;
+            --card-bg-color: #fff;
+            --text-color: #333;
+            --heading-color: #333;
+            --border-color: #ddd;
+            --highlight-color: #f2f2f2;
+            --pre-bg-color: #f8f8f8;
+            --primary-color: #4CAF50;
+        }
+
+        body.dark-mode {
+            --background-color: #121212;
+            --card-bg-color: #1e1e1e;
+            --text-color: #e0e0e0;
+            --heading-color: #ffffff;
+            --border-color: #333;
+            --highlight-color: #1e1e1e;
+            --pre-bg-color: #2a2a2a;
+            --primary-color: #66bb6a;
+        }
+
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: var(--background-color);
+            color: var(--text-color);
+            transition: background-color 0.3s, color 0.3s;
+        }
+
+        .container {
+            width: 80%;
+            margin: 20px auto;
+            padding: 20px;
+            background-color: var(--card-bg-color);
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            transition: background-color 0.3s, color 0.3s;
+        }
+
+        h1, h2 {
+            color: var(--heading-color);
+        }
+
+        table {
+            width: 100%;
+            margin-bottom: 20px;
+            border-collapse: collapse;
+        }
+
+        table, th, td {
+            border: 1px solid var(--border-color);
+        }
+
+        th, td {
+            padding: 8px;
+            text-align: left;
+        }
+
+        th {
+            background-color: var(--highlight-color);
+        }
+
+        pre {
+            background-color: var(--pre-bg-color);
+            padding: 10px;
+            border: 1px solid var(--border-color);
+            white-space: pre-wrap;
+            word-wrap: break-word;
+            color: var(--text-color);
+        }
+
+        ul {
+            list-style-type: none;
+            padding-left: 0;
+        }
+
+        ul li {
+            margin-bottom: 8px;
+        }
+
+        .question-set {
+            margin-top: 30px;
+        }
+
+        .question-set h3 {
+            margin-bottom: 10px;
+        }
+
+        .theme-toggle-container {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            z-index: 1000;
+            display: flex;
+            align-items: center;
+            cursor: pointer;
+        }
+
+        .theme-toggle {
+            position: relative;
+            width: 60px;
+            height: 30px;
+            background-color: var(--card-bg-color);
+            border-radius: 15px;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+            border: 1px solid var(--border-color);
+            transition: background-color 0.3s;
+        }
+
+        .theme-toggle::after {
+            content: '';
+            position: absolute;
+            top: 3px;
+            left: 3px;
+            width: 24px;
+            height: 24px;
+            background-color: var(--primary-color);
+            border-radius: 50%;
+            transition: transform 0.3s;
+        }
+
+        body.dark-mode .theme-toggle::after {
+            transform: translateX(30px);
+        }
+
+        .theme-icon {
+            margin-left: 10px;
+            font-size: 16px;
+            color: var(--text-color);
+            transition: color 0.3s;
+        }
+    </style>
+</head>
+
+<body>
+    <!-- Theme toggle button -->
+    <div class="theme-toggle-container" id="themeToggleContainer">
+        <div class="theme-toggle" id="themeToggle"></div>
+        <span class="theme-icon" id="themeIcon">🌙</span>
+    </div>
+
+    <div class="container">
+        <h1>Personality Prediction Results</h1>
+
+        <!-- Content from your original code -->
+        <!-- Predicted Personality Traits -->
+        <div class="traits">
+            <h2>Predicted Personality Traits</h2>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Trait</th>
+                        <th>Probability</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for trait in personality_traits %}
+                    <tr>
+                        <td class="highlight">{{ trait.keys() | list | first }}</td>
+                        <td>{{ (trait.values() | list | first) * 100 }}%</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+
+        <!-- Parsed Resume Text -->
+        <div class="resume-section">
+            <h2>Parsed Resume Text</h2>
+            <pre>{{ resume_text }}</pre>
+        </div>
+
+        <!-- Interview Question Sets -->
+        <div class="question-set">
+            <h2>Generated Interview Question Sets</h2>
+            <div class="question-set">
+                <h3>Set 1:</h3>
+                <ul>
+                    {% for question in questions[0] %}
+                    <li>{{ question }}</li>
+                    {% endfor %}
+                </ul>
+            </div>
+            <div class="question-set">
+                <h3>Set 2:</h3>
+                <ul>
+                    {% for question in questions[1] %}
+                    <li>{{ question }}</li>
+                    {% endfor %}
+                </ul>
+            </div>
+            <div class="question-set">
+                <h3>Set 3:</h3>
+                <ul>
+                    {% for question in questions[2] %}
+                    <li>{{ question }}</li>
+                    {% endfor %}
+                </ul>
+            </div>
+        </div>
+    </div>
+
+    <!-- JavaScript for theme toggling -->
+    <script>
+        const themeToggle = document.getElementById('themeToggle');
+        const themeIcon = document.getElementById('themeIcon');
+
+        themeToggle.addEventListener('click', () => {
+            document.body.classList.toggle('dark-mode');
+            themeIcon.textContent = document.body.classList.contains('dark-mode') ? '💡' : '🌙';
+        });
+    </script>
+</body>
+
+</html>
